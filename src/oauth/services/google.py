@@ -16,3 +16,5 @@ def check_google_auth(google_user: serializers.GoogleAuth) -> dict:
 
     user, _ = AuthUser.objects.get_or_create(email=google_user['email'])
     return base_auth.create_token(user.id)
+
+

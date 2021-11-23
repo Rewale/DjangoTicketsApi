@@ -12,7 +12,8 @@ class AuthUser(models.Model):
     join_date = models.DateTimeField(auto_now_add=True)
     country = models.CharField(max_length=30, blank=True, null=True)
     city = models.CharField(max_length=30, blank=True, null=True)
-    Miles = models.FloatField(default=0)
+    miles = models.FloatField(default=0)
+    password = models.CharField(max_length=30, blank=True, null=True)
 
     class Meta:
         # unique_together = (('passportSeries', 'passportNum'),)
@@ -21,7 +22,7 @@ class AuthUser(models.Model):
 
     @property
     def is_authenticated(self):
-        """Всегда возвращает True. Способ узнать, был бы пользователь аутентифицирован"""
+        """Всегда возвращает True. Способ узнать, был ли пользователь аутентифицирован"""
         return True
 
     def __str__(self):
