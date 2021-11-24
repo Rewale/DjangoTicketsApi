@@ -5,10 +5,10 @@ from rest_framework import permissions
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Audio library",
+        title="AirTickets",
         default_version='v1',
-        description="Пример аудио библиотеки",
-        contact=openapi.Contact(url="https://www.google.com"),
+        description="Продажа и покупка авиабилетов",
+        contact=openapi.Contact(url="https://www.vk.com/danonchibok"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),

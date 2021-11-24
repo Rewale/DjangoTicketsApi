@@ -4,6 +4,7 @@ from src.oauth import serializers
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
+
 from src.oauth.models import AuthUser
 from . import base_auth
 

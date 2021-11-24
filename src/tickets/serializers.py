@@ -1,16 +1,11 @@
 from rest_framework import serializers
 from . import models
 
-
-class TicketSerializer(serializers.ModelSerializer):
-    """Список билетов"""
-
-    class Meta:
-        model = models.Ticket
-        fields = ('FlightOfTicket', 'Seq', 'Cost', 'Seat')
+# TODO:Получение рейса со всеми некупленными билетами (listserializer),
+# TODO:Пересмотреть гайды по выводу списков и серилизаторам, привязка свойства?
+# TODO:Покупка билетов, urls:create,
 
 
-# TODO: серилизовать компанию
 class CompanySerializer(serializers.ModelSerializer):
     """Серилизатор компании"""
     class Meta:
@@ -18,13 +13,35 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TicketSerializer(serializers.ModelSerializer):
+    """Список билетов"""
+
+    class Meta:
+        model = models.Ticket
+        fields = ('Seq', 'Cost', 'Seat')
+
+
 class FlightSerializer(serializers.ModelSerializer):
     """Список рейсов"""
-    count_tickets = serializers.IntegerField()
+    # count_tickets = serializers.IntegerField()
     Company = CompanySerializer()
+    tickets = TicketSerializer()
 
     class Meta:
         model = models.Flight
-        fields = ('Flight_ID', 'DateFrom', 'DateTo', 'airFrom', 'airTo', 'Company', 'count_tickets')
+        fields = ('Flight_ID', 'DateFrom', 'DateTo', 'airFrom', 'airTo', 'Company', 'tickets')
+
+
+class NumFlightSerializer(serializers.Serializer):
+    FlightNum = serializers.CharField()
+
+
+
+
+
+
+
+
+
 
 

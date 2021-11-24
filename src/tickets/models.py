@@ -161,8 +161,9 @@ class Ticket(models.Model):
     Seat = models.CharField(max_length=5, verbose_name="Место")
 
     Passenger = models.ForeignKey(to=Passenger, on_delete=models.CASCADE, verbose_name="Пассажир",
-                                  default=None)
-    Customer = models.ForeignKey(to=AuthUser, on_delete=models.CASCADE, verbose_name="Покупатель", default=None, null=True)
+                                  default=None, null=True, blank=True)
+    Customer = models.ForeignKey(to=AuthUser, on_delete=models.CASCADE, verbose_name="Покупатель", default=None,
+                                 null=True, blank=True)
 
 
 

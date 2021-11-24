@@ -17,7 +17,7 @@ class GoogleAuth(serializers.Serializer):
 
 
 class MailPasswordAuth(serializers.Serializer):
-    """Серилизация данных от гугл"""
+    """Серилизация данных почты/пароль"""
     email = serializers.EmailField()
     password = serializers.CharField()
 

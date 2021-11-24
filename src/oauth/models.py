@@ -5,6 +5,7 @@ from src.base.services import get_path_upload_avatar, validate_size_image
 
 
 class AuthUser(models.Model):
+    # TODO: код подтверждения почты
     """
     Модель пользователя на платформе
     """

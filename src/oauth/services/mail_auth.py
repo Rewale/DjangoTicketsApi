@@ -9,7 +9,8 @@ from . import base_auth
 
 def check_mail_password_auth(user_data: serializers.MailPasswordAuth) -> dict:
     """Авторизация через почту
-    TODO:Добавить подтверждение почты через код"""
+    """
+    #TODO:Добавить подтверждение почты через код
     try:
         user = AuthUser.objects.get(email=user_data['email'], password=user_data['password'])
     except AuthUser.DoesNotExist:
@@ -23,8 +24,8 @@ def check_mail_password_auth(user_data: serializers.MailPasswordAuth) -> dict:
 
 
 def check_mail_password_reg(user_data: serializers.MailPasswordAuth) -> dict:
-    """Регистрация через почту
-    TODO:Добавить подтверждение почты через код"""
+    """Регистрация через почту"""
+    #TODO:Добавить подтверждение почты через код
     try:
         user = AuthUser.objects.create(email=user_data['email'], password=user_data['password'])
     except IntegrityError:
