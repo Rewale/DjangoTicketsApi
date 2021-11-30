@@ -6,5 +6,6 @@ urlpatterns = [
     path('google/', auth_view.google_auth),
     path('mail_pass_auth/', auth_view.mail_auth),
     path('mail_pass_reg/', auth_view.mail_reg),
+    path('mail_pass_accept/', auth_view.mail_accept),
     path('', auth_view.google_login),
 ]

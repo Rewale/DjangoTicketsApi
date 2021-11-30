@@ -14,6 +14,7 @@ from . import models
 
 # TODO:адекватное и красивое отображение всех моделей
 #  https://developer.mozilla.org/ru/docs/Learn/Server-side/Django/Admin_site
+# TODO: Подставлять возраст на МОМЕНТ вылета
 class TicketsInstanceInline(admin.TabularInline):
     """Билеты"""
     model = models.Ticket
@@ -38,7 +39,7 @@ class TicketsInstanceInline(admin.TabularInline):
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
-    # TODO: При добавлении покупателя, подставлять по возможности пассажира
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         print(kwargs)
         # if db_field.name == "Customer":

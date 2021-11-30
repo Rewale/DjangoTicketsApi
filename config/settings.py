@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'src.oauth',
     'src.tickets',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -97,7 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'ru'
+LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
@@ -133,7 +134,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('src.oauth.services.auth_backend.AuthBackend',),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny'
-    ]
+    ],
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    )
 }
 
 
@@ -146,3 +150,11 @@ SWAGGER_SETTINGS = {
         }
     }
 }
+
+# Использовать gmail
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'komaroff.sania2015@gmail.com'
+DEFAULT_FROM_EMAIL = 'komaroff.sania2015@gmail.com'
+EMAIL_HOST_PASSWORD = 'dyjvnbpxirvepfiv'

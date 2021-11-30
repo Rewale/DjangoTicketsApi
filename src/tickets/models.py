@@ -15,6 +15,8 @@ class AirCompany(models.Model):
     """Авиакомпания - поставщик билетов"""
     icon = models.ImageField()
     name = models.CharField(max_length=50)
+    discount_for_INF = models.IntegerField("Скидка для детей младше 2 лет", default=90)
+    discount_for_CHD = models.IntegerField("Скидка для детей от 2 до 14 лет", default=50)
 
     class Meta:
         verbose_name = 'Авиакомпания'
@@ -90,16 +92,15 @@ class Passenger(models.Model):
     """Пассажир"""
     # passportSeries = models.CharField(max_length=4, primary_key=True, verbose_name="Серия паспорта")
     # passportNum = models.CharField(max_length=6, verbose_name="Номер паспорта")
-    document = models.CharField(max_length=25, primary_key=True)
+    document = models.CharField(verbose_name="Документ", max_length=25, primary_key=True)
     birthDate = models.DateField(verbose_name="День рождения")
-    citizenship = models.ForeignKey(to=Country, related_name="citizens", on_delete=models.CASCADE)
-    FIO = models.CharField(max_length=100)
+    citizenship = models.ForeignKey(verbose_name="Гражданство", to=Country, related_name="citizens", on_delete=models.CASCADE)
+    FIO = models.CharField("ФИО", max_length=100)
 
-    def get_age(self):
-        start_date = datetime.today()
+    def get_age(self, start_date=datetime.today().date()):
         end_date = self.birthDate
-        difference = end_date - start_date
-        difference_in_years = (difference.days + difference.seconds / 86400) / 365.2425
+        difference = start_date - end_date
+        difference_in_years = round((difference.days + difference.seconds / 86400) / 365.2425)
         print(difference_in_years)
         return difference_in_years
 
@@ -107,48 +108,16 @@ class Passenger(models.Model):
         verbose_name = 'Пассажир'
         verbose_name_plural = 'Пассажиры'
 
-# # Кастомный юзер
-# # TODO: foreing key mismatch ticket - customer
-# class Customer(models.Model):
-#     """Покупатель"""
-#
-#     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-#     passenger = models.OneToOneField(Passenger, on_delete=models.PROTECT, null=True, default=None, blank=True)
-#     Miles = models.FloatField(default=0)
-#
-#     class Meta:
-#         # unique_together = (('passportSeries', 'passportNum'),)
-#         verbose_name = 'Покупатель'
-#         verbose_name_plural = 'Покупатели'
-#
-#     # user = models.ForeignKey(to=User,
-#     #                          default=User.objects.get(pk=1).pk,
-#     #                          on_delete=models.CASCADE,
-#     #                          related_name='posts')
-#
-#
-#     def __str__(self):
-#         return f'{self.user.pk}:{self.user.username}'
-
-# Сигналы, при обновлении пользователя изменияется покупатель
-
-
-# @receiver(post_save, sender=User)
-# def create_user_profile(sender, instance, created, **kwargs):
-#     if created:
-#         Customer.objects.create(user=instance)
-#
-#
-# @receiver(post_save, sender=User)
-# def save_user_profile(sender, instance, **kwargs):
-#     instance.profile.save()
+    def __str__(self):
+        return f'{self.FIO}:{self.get_age()}'
 
 
 class Ticket(models.Model):
+    # TODO: Проблема с добавлением айди вместо Seq (на крайняк создавать БД заново)
     """Билет"""
 
     class Meta:
-        unique_together = (('Seq', 'FlightOfTicket'),)
+        unique_together = (('Seat', 'FlightOfTicket'),)
         verbose_name = 'Билет'
         verbose_name_plural = 'Билеты'
 
@@ -165,7 +134,7 @@ class Ticket(models.Model):
     Customer = models.ForeignKey(to=AuthUser, on_delete=models.CASCADE, verbose_name="Покупатель", default=None,
                                  null=True, blank=True)
 
-
+    Is_bought = models.BooleanField(verbose_name="Куплен?", default=False)
 
     def __str__(self):
         return f'{self.FlightOfTicket}:{self.Seat}'

@@ -5,7 +5,7 @@ from rest_framework.exceptions import AuthenticationFailed
 
 from .. import serializers
 from ..services.google import check_google_auth
-from ..services.mail_auth import check_mail_password_auth, check_mail_password_reg
+from ..services.mail_auth import check_mail_password_auth, check_mail_password_reg, accept_user
 
 
 def google_login(request):
@@ -43,6 +43,17 @@ def mail_reg(request):
         return Response(token)
     else:
         raise AuthenticationFailed(code=403, detail='Bad data mail/password')
+
+
+@api_view(['POST'])
+def mail_accept(request):
+    """Подтверждение пользователя"""
+    user_data = serializers.MailAcceptCode(data=request.data)
+    if user_data.is_valid():
+        token = accept_user(user_data.data)
+        return Response(token)
+    else:
+        raise AuthenticationFailed(code=403, detail='Bad data mail')
 
 
 

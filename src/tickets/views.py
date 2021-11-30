@@ -1,20 +1,23 @@
-from django.http import JsonResponse
-from django.shortcuts import render
 from rest_framework import generics, permissions
-from rest_framework.decorators import api_view, renderer_classes
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from . import models as models_app
-from src.oauth.models import AuthUser
-from src.oauth.serializers import UserSerializer
 from django.db import models
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from src.oauth.serializers import UserSerializer
+from . import models as models_app
 # Create your views here.
-from .serializers import TicketSerializer, FlightSerializer, NumFlightSerializer
+from .filters import FlightFilter
+from .serializers import TicketDetailSerializer, FlightSerializer, TicketBuySerializer
+
+
+# TODO Доступ к конкретному билету по ссылке
 
 
 class UsersTickets(generics.ListAPIView):
     """Список билетов купленных пользователем"""
-    serializer_class = TicketSerializer
+    serializer_class = TicketDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -28,7 +31,7 @@ class UsersTickets(generics.ListAPIView):
 
 class TicketsListView(generics.ListAPIView):
     """Вывод списка билетов"""
-    serializer_class = TicketSerializer
+    serializer_class = TicketDetailSerializer
 
     # filter_backends = (DjangoFilterBackend,)
     # filterset_class = service.MovieFilter
@@ -41,26 +44,21 @@ class TicketsListView(generics.ListAPIView):
         return tickets
 
 
-# TODO: нормально передавать параметры в запросе
-class TicketsInFlightListView(APIView):
-    """Вывод билетов определенного рейса"""
+class TicketsDetailView(APIView):
+    """Вывод билета определенного рейса"""
 
-    def post(self, request):
-        user_data = NumFlightSerializer(data=request.data)
-        if user_data.is_valid():
-            flight_num = user_data.data['FlightNum']
-            print(flight_num)
-            if flight_num:
-                tickets = models_app.Ticket.objects.filter(FlightOfTicket=flight_num, Customer=None)
-            else:
-                tickets = models_app.Ticket.objects.filter(Customer=None)
-            serializer = TicketSerializer(tickets, many=True)
+    def get(self, request, flight_num, seq):
+        ticket = models_app.Ticket.objects.get(Seq=seq, FlightOfTicket=flight_num)
+        serializer = TicketDetailSerializer(ticket)
 
-            return Response(serializer.data)
+        return Response(serializer.data)
 
 
 class FlightListView(generics.ListAPIView):
+    # TODO: Количетсво билетов которые НЕ купили
     serializer_class = FlightSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = FlightFilter
 
     def get_queryset(self):
         flights = models_app.Flight.objects.annotate(count_tickets=models.Count('tickets'))
@@ -68,18 +66,42 @@ class FlightListView(generics.ListAPIView):
         return flights
 
 
-@api_view(('POST',))
-# @renderer_classes((TemplateHTMLRenderer, JSONRenderer))
-def buy_ticket(request, flight_num, seq):
+class FlightDetailView(APIView):
 
-    ticket = models_app.Ticket.objects.get(FlightOfTicket=flight_num, Seq=seq)
+    def get(self, request, flight_num):
+        try:
+            flight = models_app.Flight.objects.annotate(count_tickets=models.Count('tickets')).get(Flight_ID=flight_num)
+        except models_app.Flight.DoesNotExist:
+            return Response(status=404)
+        serializer = FlightSerializer(flight)
 
-    if ticket.Customer is not None:
-        return Response(data='{"Response"=Neok, "detail"="Билет уже куплен"}', status=403)
+        return Response(serializer.data)
 
-    ticket.Customer = models_app.Customer.objects.first()
-    ticket.save()
 
-    return Response(data='{"Response"="ok", "detail"="Билет приобритен"}', status=200)
+# TODO: попробовать переписать на generic
+# TODO: написать вью для бронирования и покупки
+class BuyTicket(APIView):
+    """Бронирование билетов"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = TicketBuySerializer(data=request.data)
+        if serializer.is_valid():
+
+            try:
+                ticket = models_app.Ticket.objects.get(Seq=serializer.validated_data.get('Seq'))
+            except models_app.Ticket.DoesNotExist:
+                return Response(serializer.errors, status=404)
+
+            # TODO: Проверка документа(в зав от возраста) и подсчет сколько лет на момент ВЫЛЕТА
+            passenger, _ = models_app.Passenger.objects.get_or_create(**serializer.validated_data.get("Passenger"))
+            ticket.Passenger = passenger
+            ticket.Customer = self.request.user
+            ticket.save()
+            return Response(status=204)
+        else:
+            return Response(serializer.errors, status=404)
+
+
 
 

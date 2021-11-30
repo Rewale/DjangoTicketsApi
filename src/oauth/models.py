@@ -5,7 +5,6 @@ from src.base.services import get_path_upload_avatar, validate_size_image
 
 
 class AuthUser(models.Model):
-    # TODO: код подтверждения почты
     """
     Модель пользователя на платформе
     """
@@ -14,7 +13,10 @@ class AuthUser(models.Model):
     country = models.CharField(max_length=30, blank=True, null=True)
     city = models.CharField(max_length=30, blank=True, null=True)
     miles = models.FloatField(default=0)
+
+    # Если авторизация по почте/пароль
     password = models.CharField(max_length=30, blank=True, null=True)
+    accept_code = models.CharField(max_length=5, blank=True, null=True)
 
     class Meta:
         # unique_together = (('passportSeries', 'passportNum'),)
