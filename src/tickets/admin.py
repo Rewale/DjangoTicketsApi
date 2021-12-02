@@ -20,24 +20,24 @@ class TicketsInstanceInline(admin.TabularInline):
     model = models.Ticket
     extra = 1
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        seq_value_default = 1
-        if db_field.name == 'Seq':
-            try:
-                resolved = resolve(request.path_info)
-                print(resolved)
-                if resolved.kwargs:
-                    print(resolved.kwargs)
-                    seq_value_default = self.parent_model.objects.get(
-                        pk=resolved.kwargs['object_id']).tickets.last().Seq + 1
-
-            except:
-                print("АШиПКА!!!")
-                # seq_value_default = 1
-            kwargs['initial'] = seq_value_default
-            print(seq_value_default)
-
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+    # def formfield_for_dbfield(self, db_field, request, **kwargs):
+    #     seq_value_default = 1
+    #     if db_field.name == 'Seq':
+    #         try:
+    #             resolved = resolve(request.path_info)
+    #             print(resolved)
+    #             if resolved.kwargs:
+    #                 print(resolved.kwargs)
+    #                 seq_value_default = self.parent_model.objects.get(
+    #                     pk=resolved.kwargs['object_id']).tickets.last().Seq + 1
+    #
+    #         except:
+    #             print("АШиПКА!!!")
+    #             # seq_value_default = 1
+    #         kwargs['initial'] = seq_value_default
+    #         print(seq_value_default)
+    #
+    #     return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -49,15 +49,15 @@ class TicketsInstanceInline(admin.TabularInline):
 
 @admin.register(models.Flight)
 class FlightAdmin(admin.ModelAdmin):
-    list_display = ('Flight_ID', 'DateFrom', 'DateTo', 'airTo', 'airFrom')
+    list_display = ('flight_ID', 'dateFrom', 'dateTo', 'airTo', 'airFrom')
     # fields = ['Flight_ID', ('DateFrom', 'DateTo'), ('airTo', 'airFrom')]
 
     fieldsets = (
         (None, {
-            'fields': ('Flight_ID', 'Company')
+            'fields': ('flight_ID', 'company')
         }),
         ('Время', {
-            'fields': ('DateFrom', 'DateTo')
+            'fields': ('dateFrom', 'dateTo')
         }),
         ('Место вылета/Прилета', {
             'fields': ['airTo', 'airFrom']

@@ -6,7 +6,7 @@ class CharFilterInFilter(filters.BaseInFilter, filters.CharFilter):
     pass
 
 
-# TODO: Попробовать сделать фильтрация по названию города
+# TODO: Попробовать сделать фильтрация по названию города, стоимости и дате
 class FlightFilter(filters.FilterSet):
     airTo = CharFilterInFilter(field_name='airTo__IATA_code', lookup_expr='in')
     airFrom = CharFilterInFilter(field_name='airFrom__IATA_code', lookup_expr='in')

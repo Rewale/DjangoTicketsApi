@@ -24,7 +24,7 @@ class UsersTickets(generics.ListAPIView):
         customer_serialized = UserSerializer(self.request.user)
         # print(customer_serialized.data)
 
-        tickets = models_app.Ticket.objects.filter(Customer__id=customer_serialized.data['id'])
+        tickets = models_app.Ticket.objects.filter(customer__id=customer_serialized.data['id'])
 
         return tickets
 
@@ -39,7 +39,7 @@ class TicketsListView(generics.ListAPIView):
 
     # Не выводим купленные билеты
     def get_queryset(self):
-        tickets = models_app.Ticket.objects.filter(Customer=None)
+        tickets = models_app.Ticket.objects.filter(customer=None)
 
         return tickets
 
@@ -48,7 +48,7 @@ class TicketsDetailView(APIView):
     """Вывод билета определенного рейса"""
 
     def get(self, request, flight_num, seq):
-        ticket = models_app.Ticket.objects.get(Seq=seq, FlightOfTicket=flight_num)
+        ticket = models_app.Ticket.objects.get(pk=seq, flightOfTicket=flight_num)
         serializer = TicketDetailSerializer(ticket)
 
         return Response(serializer.data)
@@ -70,7 +70,7 @@ class FlightDetailView(APIView):
 
     def get(self, request, flight_num):
         try:
-            flight = models_app.Flight.objects.annotate(count_tickets=models.Count('tickets')).get(Flight_ID=flight_num)
+            flight = models_app.Flight.objects.annotate(count_tickets=models.Count('tickets')).get(flight_ID=flight_num)
         except models_app.Flight.DoesNotExist:
             return Response(status=404)
         serializer = FlightSerializer(flight)
@@ -89,14 +89,14 @@ class BuyTicket(APIView):
         if serializer.is_valid():
 
             try:
-                ticket = models_app.Ticket.objects.get(Seq=serializer.validated_data.get('Seq'))
+                ticket = models_app.Ticket.objects.get(pk=serializer.validated_data.get('id'))
             except models_app.Ticket.DoesNotExist:
                 return Response(serializer.errors, status=404)
 
-            # TODO: Проверка документа(в зав от возраста) и подсчет сколько лет на момент ВЫЛЕТА
-            passenger, _ = models_app.Passenger.objects.get_or_create(**serializer.validated_data.get("Passenger"))
-            ticket.Passenger = passenger
-            ticket.Customer = self.request.user
+            # TODO: Проверка документа(в зав от возраста) и подсчет сколько лет на момент ВЫЛЕТА, скидка детям
+            passenger, _ = models_app.Passenger.objects.get_or_create(**serializer.validated_data.get("passenger"))
+            ticket.passenger = passenger
+            ticket.customer = self.request.user
             ticket.save()
             return Response(status=204)
         else:

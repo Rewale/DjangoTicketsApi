@@ -17,10 +17,10 @@ def check_mail_password_auth(user_data: serializers.MailPasswordAuth) -> dict:
         user = AuthUser.objects.get(email=user_data['email'], password=user_data['password'])
         print(user.accept_code)
         if user.accept_code is not None:
-            raise AuthenticationFailed(code=403,
+            raise AuthenticationFailed(code=401,
                                        detail='Подтвердите учетную запись')
     except AuthUser.DoesNotExist:
-        raise AuthenticationFailed(code=403,
+        raise AuthenticationFailed(code=404,
                                    detail='Неверный адрес почты/пароль')
 
     return base_auth.create_token(user.id)
@@ -59,5 +59,5 @@ def accept_user(user_data: serializers.MailAcceptCode) -> dict:
             raise AuthenticationFailed(code=403,
                                        detail='Неверный код подтверждения')
     except AuthUser.DoesNotExist:
-        raise AuthenticationFailed(code=403,
+        raise AuthenticationFailed(code=404,
                                    detail='Неверный адрес почты/пароль')

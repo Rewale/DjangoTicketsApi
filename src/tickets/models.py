@@ -7,8 +7,10 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
+from accessify import private
 
 from src.oauth.models import AuthUser
+from src.tickets.services.TicketCustomerWOEscort import TicketCustomerWOEscort
 
 
 class AirCompany(models.Model):
@@ -67,25 +69,25 @@ class Airport(models.Model):
 
 class Flight(models.Model):
     """Рейс"""
-    Flight_ID = models.CharField(max_length=6, primary_key=True, verbose_name="Номер рейса")
-    DateFrom = models.DateTimeField(verbose_name="Время вылета")
-    DateTo = models.DateTimeField(verbose_name="Время прилета (прибл.)")
+    flight_ID = models.CharField(max_length=6, primary_key=True, verbose_name="Номер рейса")
+    dateFrom = models.DateTimeField(verbose_name="Время вылета")
+    dateTo = models.DateTimeField(verbose_name="Время прилета (прибл.)")
     # Gate = models.DateTimeField()
     # CountOfTickets = models.IntegerField()
     airFrom = models.ForeignKey(to=Airport, on_delete=models.CASCADE, related_name="airFrom", verbose_name="Вылет из"
                                 , default=None)
     airTo = models.ForeignKey(to=Airport, on_delete=models.CASCADE, related_name='airTo', verbose_name="Прилет в"
                               , default=None)
-    Company = models.ForeignKey(to=AirCompany, on_delete=models.CASCADE, related_name='company',
+    company = models.ForeignKey(to=AirCompany, on_delete=models.CASCADE, related_name='company',
                                 verbose_name="Компания")
-    Miles = models.FloatField(verbose_name="Количетсво миль", default=0)
+    miles = models.FloatField(verbose_name="Количетсво миль", default=0)
 
     class Meta:
         verbose_name = 'Рейс'
         verbose_name_plural = 'Рейсы'
 
     def __str__(self):
-        return f'{self.Flight_ID}'
+        return f'{self.flight_ID}'
 
 
 class Passenger(models.Model):
@@ -117,24 +119,35 @@ class Ticket(models.Model):
     """Билет"""
 
     class Meta:
-        unique_together = (('Seat', 'FlightOfTicket'),)
+        unique_together = (('seat', 'flightOfTicket'),)
         verbose_name = 'Билет'
         verbose_name_plural = 'Билеты'
 
-    FlightOfTicket = models.ForeignKey(to=Flight, on_delete=models.CASCADE, related_name='tickets')
+    flightOfTicket = models.ForeignKey(to=Flight, on_delete=models.CASCADE, related_name='tickets')
 
-    Seq = models.IntegerField(primary_key=True, verbose_name="Номер",
-                              default=1)
+    cost = models.IntegerField(verbose_name="Цена")
+    seat = models.CharField(max_length=5, verbose_name="Место")
 
-    Cost = models.IntegerField(verbose_name="Цена")
-    Seat = models.CharField(max_length=5, verbose_name="Место")
+    passenger = models.ForeignKey(to=Passenger, on_delete=models.CASCADE, verbose_name="Пассажир",
+                                  default=None, null=True, blank=True, related_name='seat')
 
-    Passenger = models.ForeignKey(to=Passenger, on_delete=models.CASCADE, verbose_name="Пассажир",
-                                  default=None, null=True, blank=True)
-    Customer = models.ForeignKey(to=AuthUser, on_delete=models.CASCADE, verbose_name="Покупатель", default=None,
+    escort_passenger = models.ForeignKey(to=Passenger, on_delete=models.CASCADE, verbose_name="Пассажир",
+                                         default=None, null=True, blank=True, related_name='escort')
+
+    customer = models.ForeignKey(to=AuthUser, on_delete=models.CASCADE, verbose_name="Покупатель", default=None,
                                  null=True, blank=True)
 
-    Is_bought = models.BooleanField(verbose_name="Куплен?", default=False)
+    is_bought = models.BooleanField(verbose_name="Куплен?", default=False)
+
+    @property
+    def seat_passenger(self):
+        return self.passenger
+    # Свойство для записи пассажира
+
+    @seat_passenger.setter  # property-name.setter decorator
+    def seat_passenger(self, value: Passenger):
+        if value.get_age() < 16 and self.escort_passenger is None:
+            raise TicketCustomerWOEscort
 
     def __str__(self):
-        return f'{self.FlightOfTicket}:{self.Seat}'
+        return f'{self.flightOfTicket}:{self.seat}'

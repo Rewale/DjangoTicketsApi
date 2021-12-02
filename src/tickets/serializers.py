@@ -25,11 +25,11 @@ class TicketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Ticket
-        fields = ('Seq', 'Cost', 'Seat')
+        fields = ('cost', 'seat', 'flightOfTicket')
 
     # TODO: другой способ скрыть купленные билеты - сделать антацию рейса со списком не купленных билетов
     def to_representation(self, instance: models.Ticket):
-        if instance.Customer is not None:
+        if instance.customer is not None:
             return
         return super().to_representation(instance=instance)
 
@@ -49,18 +49,18 @@ class PassengerSerializer(serializers.ModelSerializer):
 
 class TicketBuySerializer(serializers.Serializer):
     """Покупка билета"""
-    Seq = serializers.IntegerField()
-    Passenger = PassengerSerializer()
+    id = serializers.IntegerField()
+    passenger = PassengerSerializer()
 
 
 class FlightSerializer(serializers.ModelSerializer):
     """Информация о рейсе со всеми билетами"""
     count_tickets = serializers.IntegerField()
-    Company = CompanySerializer()
+    company = CompanySerializer()
     tickets = TicketSerializer(many=True)
 
     class Meta:
         model = models.Flight
-        fields = ('Flight_ID', 'DateFrom', 'DateTo', 'airFrom', 'airTo', 'Company', 'count_tickets', 'tickets')
+        fields = ('flight_ID', 'dateFrom', 'dateTo', 'airFrom', 'airTo', 'company', 'count_tickets', 'tickets')
 
 
