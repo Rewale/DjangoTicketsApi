@@ -1,0 +1,5 @@
+.idea
+idea
+.DS_STORE
+.env.dev
+venv

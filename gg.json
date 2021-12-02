@@ -1,0 +1,9 @@
+{
+    "Seq":6,
+    "Passenger":{
+        "document":"1233 312321",
+        "birthDate":"2000-12-12",
+        "citizenship":1,
+        "FIO":"Постман Постманович"
+    }
+}
