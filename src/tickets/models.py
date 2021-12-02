@@ -142,12 +142,31 @@ class Ticket(models.Model):
     @property
     def seat_passenger(self):
         return self.passenger
-    # Свойство для записи пассажира
+
+    @property
+    def escort_passenger_prop(self):
+        return self.escort_passenger
+
+    @escort_passenger_prop.setter
+    def escort_passenger_prop(self, value):
+        if value.get_age() < 16:
+            raise TicketEscortException
+        self.escort_passenger = value
 
     @seat_passenger.setter  # property-name.setter decorator
     def seat_passenger(self, value: Passenger):
         if value.get_age() < 16 and self.escort_passenger is None:
             raise TicketCustomerWOEscort
+        self.passenger = value
+
+    @property
+    def price_prop(self):
+        if 16 > self.passenger.get_age() > 2:
+            return self.cost - (self.cost * self.flightOfTicket.company.discount_for_CHD/100)
+        elif self.passenger.get_age() < 2:
+            return self.cost - (self.cost * self.flightOfTicket.company.discount_for_INF/100)
+        else:
+            return self.cost
 
     def __str__(self):
         return f'{self.flightOfTicket}:{self.seat}'
