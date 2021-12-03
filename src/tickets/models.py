@@ -7,10 +7,10 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
-from accessify import private
+
 
 from src.oauth.models import AuthUser
-from src.tickets.services.TicketCustomerWOEscort import TicketCustomerWOEscort
+from src.tickets.services.TicketCustomerWOEscort import TicketCustomerWOEscort, TicketEscortException
 
 
 class AirCompany(models.Model):
@@ -115,7 +115,6 @@ class Passenger(models.Model):
 
 
 class Ticket(models.Model):
-    # TODO: Проблема с добавлением айди вместо Seq (на крайняк создавать БД заново)
     """Билет"""
 
     class Meta:
@@ -131,13 +130,16 @@ class Ticket(models.Model):
     passenger = models.ForeignKey(to=Passenger, on_delete=models.CASCADE, verbose_name="Пассажир",
                                   default=None, null=True, blank=True, related_name='seat')
 
-    escort_passenger = models.ForeignKey(to=Passenger, on_delete=models.CASCADE, verbose_name="Пассажир",
+    escort_passenger = models.ForeignKey(to=Passenger, on_delete=models.CASCADE, verbose_name="Сопроваждающий",
                                          default=None, null=True, blank=True, related_name='escort')
 
-    customer = models.ForeignKey(to=AuthUser, on_delete=models.CASCADE, verbose_name="Покупатель", default=None,
-                                 null=True, blank=True)
-
-    is_bought = models.BooleanField(verbose_name="Куплен?", default=False)
+    @property
+    def Занятость(self) -> str:
+        """Куплен?"""
+        if self.BuysTicket is not None:
+            return "Куплен"
+        else:
+            return "Свободен"
 
     @property
     def seat_passenger(self):
@@ -161,12 +163,37 @@ class Ticket(models.Model):
 
     @property
     def price_prop(self):
-        if 16 > self.passenger.get_age() > 2:
-            return self.cost - (self.cost * self.flightOfTicket.company.discount_for_CHD/100)
-        elif self.passenger.get_age() < 2:
-            return self.cost - (self.cost * self.flightOfTicket.company.discount_for_INF/100)
-        else:
-            return self.cost
+        if self.passenger is not None:
+             # print(str(self.passenger.get_age()) + " prop")
+            if 16 > self.passenger.get_age(self.flightOfTicket.dateFrom.date()) > 2:
+                print(self.cost - (self.cost * self.flightOfTicket.company.discount_for_CHD/100))
+                return self.cost - (self.cost * self.flightOfTicket.company.discount_for_CHD/100)
+            elif self.passenger.get_age(self.flightOfTicket.dateFrom.date()) < 2:
+                return self.cost - (self.cost * self.flightOfTicket.company.discount_for_INF/100)
+
+        return self.cost
 
     def __str__(self):
         return f'{self.flightOfTicket}:{self.seat}'
+
+# Модели для учета продаж/возвратов
+
+
+class BuyTicket(models.Model):
+    """Учет покупки билета"""
+    ticket = models.OneToOneField(to=Ticket, related_name='BuysTicket', verbose_name="Билет", on_delete=models.CASCADE)
+    customer = models.ForeignKey(to=AuthUser, on_delete=models.CASCADE, verbose_name="Покупатель")
+    payments_data = models.CharField(max_length=30, verbose_name="Реквизиты")
+    payment_date = models.DateTimeField(auto_now=True, verbose_name="Дата покупки")
+
+
+class ReturnTicket(models.Model):
+    """Учет возвратов билетов"""
+    ticket = models.ForeignKey(to=Ticket, related_name='ReturnTicket', verbose_name="Билет", on_delete=models.CASCADE)
+    customer = models.ForeignKey(to=AuthUser, on_delete=models.CASCADE, related_name="ReturnedTickets",
+                                 verbose_name="Покупатель", default=None,
+                                 null=True, blank=True)
+    payments_data = models.CharField(max_length=30, verbose_name="Реквизиты")
+    cost = models.IntegerField()
+    return_date = models.DateTimeField(auto_now=True)
+

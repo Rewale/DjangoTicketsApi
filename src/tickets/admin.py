@@ -12,14 +12,13 @@ from django.utils.safestring import mark_safe
 from . import models
 
 
-# TODO:адекватное и красивое отображение всех моделей
-#  https://developer.mozilla.org/ru/docs/Learn/Server-side/Django/Admin_site
-# TODO: Подставлять возраст на МОМЕНТ вылета
 class TicketsInstanceInline(admin.TabularInline):
     """Билеты"""
     model = models.Ticket
     extra = 1
-
+    # TODO: добавить информацию о покупателе и дате покупки
+    fields = ['seat', 'cost', 'passenger', 'escort_passenger', 'Занятость', 'price_prop']
+    readonly_fields = ['Занятость', 'price_prop']
     # def formfield_for_dbfield(self, db_field, request, **kwargs):
     #     seq_value_default = 1
     #     if db_field.name == 'Seq':
@@ -27,7 +26,7 @@ class TicketsInstanceInline(admin.TabularInline):
     #             resolved = resolve(request.path_info)
     #             print(resolved)
     #             if resolved.kwargs:
-    #                 print(resolved.kwargs)
+    #                 print(resolved.kwargs)З
     #                 seq_value_default = self.parent_model.objects.get(
     #                     pk=resolved.kwargs['object_id']).tickets.last().Seq + 1
     #
@@ -91,4 +90,5 @@ admin.site.register(models.AirCompany)
 admin.site.register(models.Airport)
 admin.site.register(models.Town)
 admin.site.register(models.Country)
-
+admin.site.register(models.BuyTicket)
+admin.site.register(models.ReturnTicket)
