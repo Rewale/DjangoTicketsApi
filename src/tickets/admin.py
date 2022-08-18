@@ -12,7 +12,6 @@ from django.utils.safestring import mark_safe
 from . import models
 
 
-# TODO:адекватное и красивое отображение всех моделей
 #  https://developer.mozilla.org/ru/docs/Learn/Server-side/Django/Admin_site
 # TODO: Подставлять возраст на МОМЕНТ вылета
 class TicketsInstanceInline(admin.TabularInline):
