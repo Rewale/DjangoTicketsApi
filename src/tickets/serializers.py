@@ -1,9 +1,6 @@
 from rest_framework import serializers
 from . import models
 from collections import OrderedDict
-# TODO:Получение рейса со всеми некупленными билетами (listserializer),
-# TODO:Пересмотреть гайды по выводу списков и серилизаторам, привязка свойства?
-# TODO:Покупка билетов, urls:create,
 
 
 class CompanySerializer(serializers.ModelSerializer):

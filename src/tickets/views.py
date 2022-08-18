@@ -78,8 +78,6 @@ class FlightDetailView(APIView):
         return Response(serializer.data)
 
 
-# TODO: попробовать переписать на generic
-# TODO: написать вью для бронирования и покупки
 class BuyTicket(APIView):
     """Бронирование билетов"""
     permission_classes = [permissions.IsAuthenticated]

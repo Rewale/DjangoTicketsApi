@@ -113,7 +113,6 @@ class Passenger(models.Model):
 
 
 class Ticket(models.Model):
-    # TODO: Проблема с добавлением айди вместо Seq (на крайняк создавать БД заново)
     """Билет"""
 
     class Meta:
