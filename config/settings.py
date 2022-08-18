@@ -127,7 +127,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 60*24
 
-GOOGLE_CLIENT_ID = '829308427010-nhn07sasokgsic2qbf45g7difk1cjndq.apps.googleusercontent.com'
+GOOGLE_CLIENT_ID = ''
 
 
 REST_FRAMEWORK = {
