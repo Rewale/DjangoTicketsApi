@@ -8,7 +8,6 @@ schema_view = get_schema_view(
         title="AirTickets",
         default_version='v1',
         description="Продажа и покупка авиабилетов",
-        contact=openapi.Contact(url="https://www.vk.com/danonchibok"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
